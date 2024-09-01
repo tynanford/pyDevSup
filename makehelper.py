@@ -27,10 +27,10 @@ else:
     out = open(sys.argv[1], 'w')
 
 """
-3.2,  sysconfig
-3.10, sysconfig.get_pathi
-3.10.13 distutils is deprecated.
-3.12, distutils was removed.
+3.2      sysconfig
+3.10     sysconfig.get_path
+3.10.13  distutils is deprecated.
+3.12     distutils was removed.
 """
 if sys.version_info >= (3,10,):
     from sysconfig import get_config_var, get_path
@@ -42,8 +42,9 @@ else:
 libdir = get_config_var('LIBDIR') or ''
 
 have_np='NO'
+
 """
-Since numpy 1.18, numpy.get_include() exists.
+numpy 1.18, numpy.get_include()
 """
 try:
     from numpy import get_include
