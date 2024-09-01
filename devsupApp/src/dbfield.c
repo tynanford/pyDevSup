@@ -40,6 +40,10 @@ static const int dbf2np_map[DBF_MENU+1] = {
     NPY_INT16,   // DBF_MENU
 };
 static PyArray_Descr* dbf2np[DBF_MENU+1];
+#if NPY_ABI_VERSION < 0x02000000
+  #define PyDataType_ELSIZE(descr) ((descr)->elsize)
+  #define PyDataType_SET_ELSIZE(descr, size) (descr)->elsize = size
+#endif
 #endif
 
 typedef struct {
@@ -98,7 +102,7 @@ static PyObject* build_array(PyObject* obj, void *data, unsigned short ftype, un
 
     desc = dbf2np[ftype];
     if(ftype==DBF_STRING) {
-        desc->elsize = MAX_STRING_SIZE;
+        PyDataType_SET_ELSIZE(desc, MAX_STRING_SIZE);
     }
 
     Py_XINCREF(desc);

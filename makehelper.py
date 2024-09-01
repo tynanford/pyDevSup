@@ -26,15 +26,24 @@ else:
         pass
     out = open(sys.argv[1], 'w')
 
-from distutils.sysconfig import get_config_var, get_python_inc
+if sys.version_info >= (3,10,):
+    from sysconfig import get_config_var, get_path
+    incdirs = [get_path("include")]
+else:
+    from distutils.sysconfig import get_config_var, get_python_inc
+    incdirs = [get_python_inc()]
 
-incdirs = [get_python_inc()]
 libdir = get_config_var('LIBDIR') or ''
 
 have_np='NO'
 try:
-    from numpy.distutils.misc_util import get_numpy_include_dirs
-    incdirs = get_numpy_include_dirs()+incdirs
+    if sys.version_info >= (3,10,):
+        from numpy import get_include
+        numpy_dir = [get_include()]
+    else:
+        from numpy.distutils.misc_util import get_numpy_include_dirs
+        numpy_dir = get_numpy_include_dirs()
+    incdirs = numpy_dir+incdirs
     have_np='YES'
 except ImportError:
     pass
