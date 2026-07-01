@@ -178,7 +178,8 @@ class TestAlarm(IOCHelper):
             rec.setSevr(_dbapi.MAJOR_ALARM, _dbapi.HIHI_ALARM, message="Meaningful alarm message")
             self.assertEqual(rec.NSEV, _dbapi.MAJOR_ALARM)
             self.assertEqual(rec.NSTA, _dbapi.HIHI_ALARM)
-            self.assertEqual(rec.NAMSG, "Meaningful alarm message")
+            if  _dbapi.epicsver[:4] >= (7, 0, 6, 0):
+                self.assertEqual(rec.NAMSG, "Meaningful alarm message")
 
     def test_set_severity_without_message(self):
         rec = getRecord("rec:alarm:plain")
