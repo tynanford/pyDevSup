@@ -160,7 +160,7 @@ jobs:
             container: "python:3.7"
             profile: deb10
 
-          - os: windows-latest
+          - os: windows-2022
             cmp: vs2022
             configuration: default
             base: "3.15"
@@ -168,7 +168,7 @@ jobs:
             profile: latest
             test: yes
 
-          - os: windows-latest
+          - os: windows-2022
             cmp: vs2022
             configuration: default
             base: "7.0"
@@ -176,7 +176,7 @@ jobs:
             profile: latest
             test: yes
 
-          - os: windows-latest
+          - os: windows-2022
             cmp: vs2022
             configuration: default
             base: "7.0"
@@ -184,7 +184,7 @@ jobs:
             profile: latest
             test: yes
 
-          - os: windows-latest
+          - os: windows-2022
             cmp: vs2022
             configuration: default
             base: "7.0"
