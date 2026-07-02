@@ -5,7 +5,7 @@
 #include <epicsThread.h>
 #include <initHooks.h>
 
-#include <Python.h>
+#include <_Python.h>
 
 #ifndef VERSION_INT
 #  define VERSION_INT(V,R,M,P) ( ((V)<<24) | ((R)<<16) | ((M)<<8) | (P))

@@ -3,9 +3,9 @@
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 
-#include <Python.h>
+#include <_Python.h>
 #ifdef HAVE_NUMPY
-#include <numpy/ndarrayobject.h>
+#include <_numpy/ndarrayobject.h>
 #endif
 
 #include <epicsVersion.h>

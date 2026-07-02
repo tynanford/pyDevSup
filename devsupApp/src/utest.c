@@ -3,7 +3,7 @@
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 
-#include <Python.h>
+#include <_Python.h>
 
 #include <epicsVersion.h>
 #include <dbEvent.h>
