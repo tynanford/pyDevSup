@@ -52,32 +52,17 @@ def _init(iocMain=False):
                               path=os.path.join(XEPICS_BASE, "dbd"))
         _dbapi._dbd_rrd_base()
 
-    with tempfile.NamedTemporaryFile() as F:
-        F.write("""
-device(longin, INST_IO, pydevsupComIn, "Python Device")
-device(longout, INST_IO, pydevsupComOut, "Python Device")
-
-device(ai, INST_IO, pydevsupComIn, "Python Device")
-device(ao, INST_IO, pydevsupComOut, "Python Device")
-
-device(stringin, INST_IO, pydevsupComIn, "Python Device")
-device(stringout, INST_IO, pydevsupComOut, "Python Device")
-
-device(bi, INST_IO, pydevsupComIn, "Python Device")
-device(bo, INST_IO, pydevsupComOut, "Python Device")
-
-device(mbbi, INST_IO, pydevsupComIn, "Python Device")
-device(mbbo, INST_IO, pydevsupComOut, "Python Device")
-
-device(mbbiDirect, INST_IO, pydevsupComIn, "Python Device")
-device(mbboDirect, INST_IO, pydevsupComOut, "Python Device")
-
-device(waveform, INST_IO, pydevsupComIn, "Python Device")
-device(aai, INST_IO, pydevsupComIn, "Python Device")
-device(aao, INST_IO, pydevsupComOut, "Python Device")
-""".encode('ascii'))
-        F.flush()
-        _dbapi.dbReadDatabase(F.name)
+    dirname = os.path.dirname(__file__)
+    dbd_name = dirname + "/_dbapi.dbd"
+    _dbapi.dbReadDatabase(dbd_name)
+    if epicsver >= (3, 15, 0, 2):
+        # Long strings are impletemented.
+        dbd_name = dirname + "/_lsilso.dbd"
+        _dbapi.dbReadDatabase(dbd_name)
+    if epicsver >= (3, 16, 1, 0):
+        # Long ints are impletemented.
+        dbd_name = dirname + "/_int64.dbd"
+        _dbapi.dbReadDatabase(dbd_name)
     _dbapi._dbd_setup()
 
 def _fini(iocMain=False):
