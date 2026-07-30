@@ -218,12 +218,12 @@ class TestInt64Field(IOCHelper):
         }
     """
     if  _dbapi.epicsver[:4] < (3, 16, 1, 0):
-        # Long ints not impletemented yet.
+        # Long ints not implemented yet.
         db = None
 
     def testint64(self):
         if  _dbapi.epicsver[:4] < (3, 16, 1, 0):
-            # Long ints not impletemented yet.
+            # Long ints not implemented yet.
             return
         in64 = getRecord("rec:in64")
         out64 = getRecord("rec:out64")
