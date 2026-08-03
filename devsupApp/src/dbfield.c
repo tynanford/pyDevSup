@@ -141,10 +141,10 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
     if(paddr->special==SPC_DBADDR)
     {
         prset = prset=dbGetRset(paddr);
+        void *datasave=paddr->pfield;
         if (prset->get_array_info)
         {
             /* array */
-            char *datasave=paddr->pfield;
             long noe, off;
             if(prset->get_array_info(paddr, &noe, &off)) {
                 PyErr_Format(PyExc_ValueError, "Error fetching array info for %s.%s",
@@ -160,7 +160,7 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
     }
 
     Py_XINCREF(desc);
-    if(!(aval = PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
+    if(!(aval = (PyArrayObject *)PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
         return 1;
 
     if(elemsize!=PyArray_ITEMSIZE(aval)) {
