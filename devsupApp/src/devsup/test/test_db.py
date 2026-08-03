@@ -130,7 +130,6 @@ class TestField(IOCHelper):
             assert_array_equal(rec.VAL,
                                 numpy.asarray(["zero", "", "one", "This is a really long string which shoul", "", "last"], dtype='S40'))
 
-
 class TestDset(IOCHelper):
     db = """
         record(longin, "rec:li") {
@@ -164,6 +163,7 @@ class TestDset(IOCHelper):
         with rec:
             self.assertEqual(rec.VAL, 1)
             self.assertEqual(rec.UDF, 0)
+            
 class TestLongStringField(IOCHelper):
     db = """
         record(lsi, "rec:lsi") {
@@ -245,3 +245,21 @@ class TestInt64Field(IOCHelper):
 
         with out64:
             self.assertEqual(out64.VAL, in64.VAL)
+
+class TestCalcOutRecord(IOCHelper):
+    db = """
+        record(calcout, "rec:calcout") {
+            field(OOPT, "On Change")
+            field(INPA, "0")
+            field(INPB, "0")
+            field(CALC, "A+B")
+        }
+    """
+    def test_calcoutrecord(self):
+        rec = getRecord('rec:calcout')
+        self.assertEqual(rec.VAL, 0)
+        rec.A = 40
+        rec.B = 2
+        self.assertEqual(rec.scan(sync=True), 0)
+        self.assertEqual(rec.VAL, 42)
+   
