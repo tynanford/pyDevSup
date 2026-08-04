@@ -1,7 +1,6 @@
 
 device(longin, INST_IO, pydevsupComIn, "Python Device")
 device(longout, INST_IO, pydevsupComOut, "Python Device")
-device(calcout, INST_IO, pydevsupComOut, "Python Device")
 
 device(ai, INST_IO, pydevsupComIn, "Python Device")
 device(ao, INST_IO, pydevsupComOut, "Python Device")
