@@ -131,7 +131,7 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
         PyErr_Format(PyExc_ValueError, "String array has incorrect shape or is too large");
         return 1;
 
-    } else if(PyArray_NDIM(array)!=1 || PyArray_DIM(array,0)>maxlen) {
+    } else if(PyArray_NDIM(array) != 1 || PyArray_DIM(array, 0) > (npy_intp) maxlen) {
         PyErr_Format(PyExc_ValueError, "Array has incorrect shape or is too large");
         return 1;
     }
@@ -158,7 +158,7 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
     }
 
     Py_XINCREF(desc);
-    if(!(aval = PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
+    if(!(aval = (PyArrayObject *)PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
         return 1;
 
     if(elemsize!=PyArray_ITEMSIZE(aval)) {
