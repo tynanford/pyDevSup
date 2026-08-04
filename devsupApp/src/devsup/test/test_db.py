@@ -175,7 +175,7 @@ class TestAlarm(IOCHelper):
         rec = getRecord("rec:alarm:msg")
 
         with rec:
-            rec.setSevr(_dbapi.MAJOR_ALARM, _dbapi.HIHI_ALARM, message="Meaningful alarm message")
+            rec.setSevr(_dbapi.MAJOR_ALARM, _dbapi.HIHI_ALARM, amsg="Meaningful alarm message")
             self.assertEqual(rec.NSEV, _dbapi.MAJOR_ALARM)
             self.assertEqual(rec.NSTA, _dbapi.HIHI_ALARM)
             if  _dbapi.epicsver[:4] >= (7, 0, 6, 0):
