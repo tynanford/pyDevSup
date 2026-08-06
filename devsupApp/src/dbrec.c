@@ -324,7 +324,7 @@ static PyMethodDef pyRecord_methods[] = {
      "infos() -> {'name':'value'}\n"
      "Return a dictionary of all infos for this record."},
     {"setSevr", (PyCFunction)pyRecord_setSevr, METH_VARARGS|METH_KEYWORDS,
-     "setSevr(sevr=INVALID_ALARM, stat=COMM_ALARM, amsg=Nome)\n"
+     "setSevr(sevr=INVALID_ALARM, stat=COMM_ALARM, amsg=None)\n"
      "Set alarm new alarm severity/status.  Record must be locked!\n"
      "amsg requires EPICS Base >= 7.0.6."},
     {"setTime", (PyCFunction)pyRecord_setTime, METH_VARARGS,
