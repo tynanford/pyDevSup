@@ -3,6 +3,7 @@
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 
+#include <Python.h>
 #ifdef HAVE_NUMPY
 #include <numpy/ndarrayobject.h>
 #endif
@@ -116,9 +117,9 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 {
 #ifdef HAVE_NUMPY
     void *rawfield = paddr->pfield;
-    rset *prset = NULL;
-    PyArrayObject *aval = NULL;
-    PyArrayObject * array = (PyArrayObject *)arr;
+    rset *prset;
+    PyObject *aval;
+    PyArrayObject *array = (PyArrayObject *)arr;
     unsigned elemsize = dbValueSize(paddr->field_type);
     unsigned long maxlen = paddr->no_elements, insize;
     PyArray_Descr *desc = dbf2np[paddr->field_type];
@@ -138,20 +139,18 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 
     insize = PyArray_DIM(array, 0);
 
-    if(paddr->special==SPC_DBADDR)
+    if(paddr->special==SPC_DBADDR &&
+       (prset=dbGetRset(paddr)) &&
+       prset->get_array_info)
     {
-        prset = prset=dbGetRset(paddr);
-        void *datasave=paddr->pfield;
-        if (prset->get_array_info)
-        {
-            /* array */
-            long noe, off;
-            if(prset->get_array_info(paddr, &noe, &off)) {
-                PyErr_Format(PyExc_ValueError, "Error fetching array info for %s.%s",
-                        paddr->precord->name,
-                        paddr->pfldDes->name);
-                return 1;
-            }
+        /* array */
+        char *datasave=paddr->pfield;
+        long noe, off;
+        if(prset->get_array_info(paddr, &noe, &off)) {
+            PyErr_Format(PyExc_ValueError, "Error fetching array info for %s.%s",
+                     paddr->precord->name,
+                     paddr->pfldDes->name);
+            return 1;
         }
 
         rawfield = paddr->pfield;
@@ -160,26 +159,28 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
     }
 
     Py_XINCREF(desc);
-    if(!(aval = (PyArrayObject *)PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
+    if(!(aval = PyArray_FromAny(arr, desc, 1, 2, NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED | NPY_ARRAY_WRITEABLE, arr)))
         return 1;
 
-    if(elemsize!=PyArray_ITEMSIZE(aval)) {
+    if(elemsize!=PyArray_ITEMSIZE((PyArrayObject *)aval)) {
         PyErr_Format(PyExc_AssertionError, "item size mismatch %u %u",
-                     elemsize, (unsigned)PyArray_ITEMSIZE(aval) );
+                     elemsize, (unsigned)PyArray_ITEMSIZE((PyArrayObject *)aval));
+        Py_DECREF(aval);
         return 1;
     }
 
-    memcpy(rawfield, PyArray_GETPTR1(aval, 0), insize*elemsize);
+    memcpy(rawfield, PyArray_GETPTR1((PyArrayObject *)aval, 0), insize*elemsize);
 
     Py_DECREF(aval);
 
-    if(prset)
+    if(paddr->special==SPC_DBADDR &&
+       (prset=dbGetRset(paddr)) &&
+       prset->get_array_info)
     {
-        if (prset->put_array_info)
-            if(prset->put_array_info(paddr, insize)) {
-                PyErr_Format(PyExc_ValueError, "Error setting array info for %s.%s",
-                            paddr->precord->name,
-                            paddr->pfldDes->name);
+        if(prset->put_array_info(paddr, insize)) {
+            PyErr_Format(PyExc_ValueError, "Error setting array info for %s.%s",
+                         paddr->precord->name,
+                         paddr->pfldDes->name);
             return 1;
         }
     }
