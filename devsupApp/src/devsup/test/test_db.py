@@ -263,3 +263,28 @@ class TestCalcOutRecord(IOCHelper):
         self.assertEqual(rec.scan(sync=True), 0)
         self.assertEqual(rec.VAL, 42)
    
+
+
+class TestAlarm(IOCHelper):
+    db = """
+        record(longin, "rec:alarm:msg") {}
+        record(longin, "rec:alarm:plain") {}
+    """
+
+    def test_set_severity_message(self):
+        rec = getRecord("rec:alarm:msg")
+
+        with rec:
+            rec.setSevr(_dbapi.MAJOR_ALARM, _dbapi.HIHI_ALARM, amsg="Meaningful alarm message")
+            self.assertEqual(rec.NSEV, _dbapi.MAJOR_ALARM)
+            self.assertEqual(rec.NSTA, _dbapi.HIHI_ALARM)
+            if  _dbapi.epicsver[:4] >= (7, 0, 6, 0):
+                self.assertEqual(rec.NAMSG, "Meaningful alarm message")
+
+    def test_set_severity_without_message(self):
+        rec = getRecord("rec:alarm:plain")
+
+        with rec:
+            rec.setSevr(_dbapi.MAJOR_ALARM, _dbapi.COMM_ALARM)
+            self.assertEqual(rec.NSEV, _dbapi.MAJOR_ALARM)
+            self.assertEqual(rec.NSTA, _dbapi.COMM_ALARM)
