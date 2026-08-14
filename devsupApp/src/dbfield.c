@@ -116,16 +116,16 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 {
 #ifdef HAVE_NUMPY
     void *rawfield = paddr->pfield;
-    rset *prset;
-    PyArrayObject *aval;
+    rset *prset = NULL;
+    PyArrayObject *aval = NULL;
     PyArrayObject * array = (PyArrayObject *)arr;
     unsigned elemsize = dbValueSize(paddr->field_type);
     unsigned long maxlen = paddr->no_elements, insize;
     PyArray_Descr *desc = dbf2np[paddr->field_type];
 
     if(paddr->field_type==DBF_STRING &&
-        (PyArray_NDIM(array) != 2 || 
-         PyArray_DIM(array, 0) > (npy_intp) maxlen || 
+        (PyArray_NDIM(array) != 2 ||
+         PyArray_DIM(array, 0) > (npy_intp) maxlen ||
          PyArray_DIM(array, 1) != MAX_STRING_SIZE))
     {
         PyErr_Format(PyExc_ValueError, "String array has incorrect shape or is too large");
@@ -138,18 +138,20 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 
     insize = PyArray_DIM(array, 0);
 
-    if(paddr->special==SPC_DBADDR &&
-       (prset=dbGetRset(paddr)) &&
-       prset->get_array_info)
+    if(paddr->special==SPC_DBADDR)
     {
-        /* array */
-        char *datasave=paddr->pfield;
-        long noe, off;
-        if(prset->get_array_info(paddr, &noe, &off)) {
-            PyErr_Format(PyExc_ValueError, "Error fetching array info for %s.%s",
-                     paddr->precord->name,
-                     paddr->pfldDes->name);
-            return 1;
+        prset = prset=dbGetRset(paddr);
+        void *datasave=paddr->pfield;
+        if (prset->get_array_info)
+        {
+            /* array */
+            long noe, off;
+            if(prset->get_array_info(paddr, &noe, &off)) {
+                PyErr_Format(PyExc_ValueError, "Error fetching array info for %s.%s",
+                        paddr->precord->name,
+                        paddr->pfldDes->name);
+                return 1;
+            }
         }
 
         rawfield = paddr->pfield;
@@ -163,7 +165,7 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 
     if(elemsize!=PyArray_ITEMSIZE(aval)) {
         PyErr_Format(PyExc_AssertionError, "item size mismatch %u %u",
-                    elemsize, (unsigned)PyArray_ITEMSIZE(aval) );
+                     elemsize, (unsigned)PyArray_ITEMSIZE(aval) );
         Py_DECREF(aval);
         return 1;
     }
@@ -172,14 +174,13 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 
     Py_DECREF(aval);
 
-    if(paddr->special==SPC_DBADDR &&
-       (prset=dbGetRset(paddr)) &&
-       prset->get_array_info)
+    if(prset)
     {
-        if(prset->put_array_info(paddr, insize)) {
-            PyErr_Format(PyExc_ValueError, "Error setting array info for %s.%s",
-                         paddr->precord->name,
-                         paddr->pfldDes->name);
+        if (prset->put_array_info)
+            if(prset->put_array_info(paddr, insize)) {
+                PyErr_Format(PyExc_ValueError, "Error setting array info for %s.%s",
+                            paddr->precord->name,
+                            paddr->pfldDes->name);
             return 1;
         }
     }
@@ -303,8 +304,8 @@ static PyObject* pyField_putval(pyField *self, PyObject* args)
     OP(LONG,  epicsInt32,  PyInt_AsLong);
     OP(ULONG, epicsUInt32, PyInt_AsLong);
 #ifdef HAVE_INT64
-    OP(INT64,  epicsInt32,  PyLong_AsLongLong);
-    OP(UINT64, epicsUInt32, PyLong_AsLongLong);
+    OP(INT64,  epicsInt64,  PyLong_AsLongLong);
+    OP(UINT64, epicsUInt64, PyLong_AsLongLong);
 #endif
     OP(FLOAT, epicsFloat32,PyFloat_AsDouble);
     OP(DOUBLE,epicsFloat64,PyFloat_AsDouble);
@@ -321,11 +322,15 @@ static PyObject* pyField_putval(pyField *self, PyObject* args)
         fld = PyString_AsString(val);
 #endif
         if(fld) {
-          strncpy(dest, fld, MAX_STRING_SIZE);
-          dest[MAX_STRING_SIZE-1]='\0';
+          strncpy(dest, fld, self->addr.field_size);
+          dest[self->addr.field_size-1]='\0';
         } else {
           dest[0] = '\0';
         }
+        if (self->addr.special == SPC_MOD)
+            /* This is needed for long string support. */
+            if (prset = dbGetRset(&self->addr))
+                prset->special(&self->addr, 1);
 #if PY_MAJOR_VERSION >= 3
         Py_DECREF(data);
 #endif
