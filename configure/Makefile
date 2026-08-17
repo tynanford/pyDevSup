@@ -8,7 +8,7 @@ TARGETS = $(CONFIG_TARGETS)
 
 ifdef T_A
 CONFIGS = CONFIG_PY RULES_PY os/CONFIG_PY.Common.$(T_A)
-CFG += CONFIG_PY RULES_PY
+CFG += CONFIG_PY RULES_PY os/CONFIG_PY.Common.$(T_A)
 endif
 
 CONFIGS += $(subst ../,,$(wildcard $(CONFIG_INSTALLS)))
