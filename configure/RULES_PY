@@ -1,4 +1,7 @@
 ifneq ($(T_A),)
+ifndef RULES_PY_INCLUDED
+RULES_PY_INCLUDED = YES
+
 ifndef PY_VER
 $(error Must include CONFIG_PY)
 endif
@@ -13,4 +16,5 @@ $(PY_FILES) : $(PY_INSTALL_DIR)/%: ../%
 
 build: $(PY_FILES)
 
+endif
 endif

@@ -53,7 +53,13 @@ The default or preferred Python version can be specificed in *configure/CONFIG_S
 
   PY_VER ?= 3.6
 
-The following should be added to individual EPICS Makefiles. ::
+pyDevSup installs ``CONFIG_PY`` and ``RULES_PY`` into its ``cfg`` directory,
+so as soon as ``PYDEVSUP`` is set in *configure/RELEASE* they are picked up
+automatically by EPICS Base's own configure/RULES machinery -- no further
+changes to individual Makefiles are required.
+
+Older Makefiles which explicitly ``include`` these files are still
+supported. ::
 
   TOP=../..
   include $(TOP)/configure/CONFIG

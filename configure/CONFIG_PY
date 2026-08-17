@@ -1,4 +1,6 @@
 ifneq ($(T_A),)
+ifndef CONFIG_PY_INCLUDED
+CONFIG_PY_INCLUDED = YES
 
 PYMODULE ?= YES
 
@@ -54,4 +56,5 @@ endif
 
 endif
 
+endif
 endif
