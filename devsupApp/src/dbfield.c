@@ -140,9 +140,9 @@ static int assign_array(DBADDR *paddr, PyObject *arr)
 
     if(paddr->special==SPC_DBADDR)
     {
-        prset = prset=dbGetRset(paddr);
+        prset = dbGetRset(paddr);
         void *datasave=paddr->pfield;
-        if (prset->get_array_info)
+        if (prset && prset->get_array_info)
         {
             /* array */
             long noe, off;
