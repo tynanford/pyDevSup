@@ -125,10 +125,11 @@ static PyObject* pyRecord_setSevr(pyRecord *self, PyObject *args, PyObject *kws)
 {
     dbCommon *prec = self->entry.precnode->precord;
 
-    static char* names[] = {"sevr", "stat", NULL};
+    static char* names[] = {"sevr", "stat", "amsg", NULL};
     short sevr = INVALID_ALARM, stat=COMM_ALARM;
+    const char *amsg = NULL;
 
-    if(!PyArg_ParseTupleAndKeywords(args, kws, "|hh", names, &sevr, &stat))
+    if(!PyArg_ParseTupleAndKeywords(args, kws, "|hhz", names, &sevr, &stat, &amsg))
         return NULL;
 
     if(sevr<firstEpicsAlarmSev || sevr>lastEpicsAlarmSev
@@ -137,7 +138,13 @@ static PyObject* pyRecord_setSevr(pyRecord *self, PyObject *args, PyObject *kws)
         PyErr_Format(PyExc_ValueError, "%s: Can't set alarms %d %d", prec->name, sevr, stat);
         return NULL;
     }
-
+// @since 7.0.6
+#ifdef HAS_ALARM_MESSAGE
+    if(amsg) {
+        recGblSetSevrMsg(prec, stat, sevr, "%s", amsg);
+        Py_RETURN_NONE;
+    }
+#endif
     recGblSetSevr(prec, stat, sevr);
     Py_RETURN_NONE;
 }
@@ -317,8 +324,9 @@ static PyMethodDef pyRecord_methods[] = {
      "infos() -> {'name':'value'}\n"
      "Return a dictionary of all infos for this record."},
     {"setSevr", (PyCFunction)pyRecord_setSevr, METH_VARARGS|METH_KEYWORDS,
-     "setSevr(sevr=INVALID_ALARM, stat=COMM_ALARM)\n"
-     "Set alarm new alarm severity/status.  Record must be locked!"},
+     "setSevr(sevr=INVALID_ALARM, stat=COMM_ALARM, amsg=None)\n"
+     "Set alarm new alarm severity/status.  Record must be locked!\n"
+     "amsg requires EPICS Base >= 7.0.6."},
     {"setTime", (PyCFunction)pyRecord_setTime, METH_VARARGS,
      "Set record timestamp if TSE==-2.  Record must be locked!"},
     {"scan", (PyCFunction)pyRecord_scan, METH_VARARGS|METH_KEYWORDS,
