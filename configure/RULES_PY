@@ -1,9 +1,16 @@
 ifneq ($(T_A),)
 
-ifndef PY_VER
-# PY_VER (set by CONFIG_PY) may not be defined if this file was picked up
-# automatically before CONFIG_PY had a chance to run for real (see
-# configure/CONFIG_PY).  Only treat this as an error if this Makefile
+ifndef CONFIG_PY_INCLUDED
+# Note: PY_VER is *not* a reliable signal here -- configure/CONFIG_SITE
+# gives it a generic fallback default ("Legacy setting") regardless of
+# whether CONFIG_PY's real logic ever ran, so it's always defined by this
+# point.  CONFIG_PY_INCLUDED is only set once CONFIG_PY has actually
+# computed real python configuration (see configure/CONFIG_PY), so it's
+# the correct thing to check.
+#
+# CONFIG_PY_INCLUDED may legitimately be unset here if this file was
+# picked up automatically (via the cfg/ mechanism) before CONFIG_PY had a
+# chance to run for real.  Only treat that as an error if this Makefile
 # actually asked for python files to be installed (PY += ...) -- otherwise
 # there's nothing to do and no misconfiguration to report.
 ifneq ($(PY),)
