@@ -77,6 +77,14 @@ def _init(iocMain=False):
     dirname = os.path.dirname(__file__)
     dbd_name = dirname + "/_dbapi.dbd"
     _dbapi.dbReadDatabase(dbd_name)
+    if epicsver >= (3, 15, 0, 2):
+        # Long strings are impletemented.
+        dbd_name = dirname + "/_lsilso.dbd"
+        _dbapi.dbReadDatabase(dbd_name)
+    if epicsver >= (3, 16, 1, 0):
+        # Long ints are impletemented.
+        dbd_name = dirname + "/_int64.dbd"
+        _dbapi.dbReadDatabase(dbd_name)
     _dbapi._dbd_setup()
 
 def _fini(iocMain=False):
