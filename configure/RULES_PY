@@ -1,10 +1,17 @@
 ifneq ($(T_A),)
-ifndef RULES_PY_INCLUDED
-RULES_PY_INCLUDED = YES
 
 ifndef PY_VER
+# PY_VER (set by CONFIG_PY) may not be defined if this file was picked up
+# automatically before CONFIG_PY had a chance to run for real (see
+# configure/CONFIG_PY).  Only treat this as an error if this Makefile
+# actually asked for python files to be installed (PY += ...) -- otherwise
+# there's nothing to do and no misconfiguration to report.
+ifneq ($(PY),)
 $(error Must include CONFIG_PY)
 endif
+else
+ifndef RULES_PY_INCLUDED
+RULES_PY_INCLUDED = YES
 
 include $(CONFIG)/CONFIG_BASE
 
@@ -16,5 +23,6 @@ $(PY_FILES) : $(PY_INSTALL_DIR)/%: ../%
 
 build: $(PY_FILES)
 
+endif
 endif
 endif

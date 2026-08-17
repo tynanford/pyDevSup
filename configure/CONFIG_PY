@@ -1,12 +1,15 @@
 ifneq ($(T_A),)
+# PYTHON may not be set yet if this file was picked up automatically (via
+# the cfg/ mechanism, included by every module's configure/CONFIG before
+# that module's own CONFIG_SITE has run).  There's nothing useful to do in
+# that case, so skip quietly rather than erroring: RULES_PY is where a
+# missing Python configuration actually matters (it errors if PY += files
+# are requested but PY_VER never got set), so the diagnostic isn't lost.
+ifneq ($(PYTHON),)
 ifndef CONFIG_PY_INCLUDED
 CONFIG_PY_INCLUDED = YES
 
 PYMODULE ?= YES
-
-ifeq ($(PYTHON),)
-$(error Must set PYTHON to select a python version)
-endif
 
 -include $(dir $(lastword $(MAKEFILE_LIST)))/os/CONFIG_PY.$(EPICS_HOST_ARCH).Common
 -include $(dir $(lastword $(MAKEFILE_LIST)))/os/CONFIG_PY.Common.$(T_A)
@@ -56,5 +59,6 @@ endif
 
 endif
 
+endif
 endif
 endif
