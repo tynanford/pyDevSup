@@ -218,6 +218,15 @@ jobs:
       run: python .ci/cue.py prepare
     - name: Build main module
       run: python .ci/cue.py build
+    - name: Verify weatherApp installed its python files
+      shell: bash
+      run: |
+        found=$(find . -path "*/python*/*/weather.py" 2>/dev/null)
+        if [ -z "$found" ]; then
+          echo "::error::weather.py was not installed - weatherApp's python support did not build correctly"
+          exit 1
+        fi
+        echo "Found: $found"
     - name: Run main module tests
       if: matrix.test
       run: python .ci/cue.py build nose
